@@ -1,0 +1,184 @@
+{
+  "id": "root",
+  "type": "column",
+  "titlebar": "none",
+  "traffic_lights": [
+    16,
+    18
+  ],
+  "preview": "mods/spark/preview.png",
+  "theme": {
+    "light": "spark",
+    "dark": "spark-night"
+  },
+  "ui_font": "Lucida Grande",
+  "font": "Menlo",
+  "terminal_padding": [
+    12,
+    8
+  ],
+  "background": "canvas",
+  "children": [
+    {
+      "id": "header",
+      "type": "block",
+      "size": {
+        "px": 58
+      },
+      "window_drag": true,
+      "content": {
+        "mod": "spark",
+        "props": {
+          "role": "header",
+          "palette": "multicolor",
+          "features": true,
+          "plus_labels": true
+        }
+      }
+    },
+    {
+      "id": "body",
+      "type": "row",
+      "children": [
+        {
+          "id": "sidebar",
+          "type": "block",
+          "size": {
+            "px": 300
+          },
+          "min": 220,
+          "max": 440,
+          "content": {
+            "mod": "spark",
+            "props": {
+              "role": "sidebar",
+              "palette": "multicolor",
+              "features": true,
+              "activity_card": false
+            }
+          }
+        },
+        {
+          "id": "work",
+          "type": "column",
+          "padding": [
+            10,
+            14
+          ],
+          "gap": 0,
+          "resizable": false,
+          "children": [
+            {
+              "id": "tabs",
+              "type": "block",
+              "size": {
+                "px": 40
+              },
+              "content": {
+                "mod": "spark",
+                "props": {
+                  "role": "tabs",
+                  "palette": "multicolor"
+                }
+              }
+            },
+            {
+              "id": "work-body",
+              "type": "row",
+              "gap": 10,
+              "children": [
+                {
+                  "id": "main",
+                  "type": "block",
+                  "content": {
+                    "tab": "active",
+                    "pane": {
+                      "gap": 10,
+                      "radius": 0,
+                      "background": "background",
+                      "lone": true,
+                      "border": {
+                        "width": 1,
+                        "color": "border"
+                      },
+                      "focus": {
+                        "width": 1,
+                        "color": "border"
+                      },
+                      "header": {
+                        "content": {
+                          "mod": "spark",
+                          "props": {
+                            "role": "pane",
+                            "palette": "multicolor"
+                          }
+                        },
+                        "height": 32,
+                        "position": "top",
+                        "reveal": "always"
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "panel",
+                  "type": "column",
+                  "hidden": true,
+                  "size": {
+                    "px": 360
+                  },
+                  "min": 260,
+                  "max": 900,
+                  "radius": 0,
+                  "border": {
+                    "width": 1,
+                    "color": "border"
+                  },
+                  "background": "chrome",
+                  "children": [
+                    {
+                      "id": "panel-body",
+                      "type": "stack",
+                      "active": "files",
+                      "children": [
+                        {
+                          "id": "files",
+                          "type": "block",
+                          "content": {
+                            "mod": "files"
+                          }
+                        },
+                        {
+                          "id": "changes",
+                          "type": "block",
+                          "content": {
+                            "mod": "changes"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "footer",
+      "type": "block",
+      "size": {
+        "px": 32
+      },
+      "content": {
+        "mod": "spark",
+        "props": {
+          "role": "status",
+          "palette": "multicolor",
+          "features": true
+        }
+      }
+    }
+  ]
+}
