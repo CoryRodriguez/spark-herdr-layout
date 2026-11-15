@@ -450,8 +450,37 @@ namespace SparkIndicator
             hit.Cursor = Cursors.Hand;
             hit.Tag = r.Addr;
             hit.Child = d;
+            // Hover: the dot swells by about half and settles back when the pointer leaves.
+            ScaleTransform grow = new ScaleTransform(1, 1);
+            d.RenderTransformOrigin = new Point(0.5, 0.5);
+            d.RenderTransform = grow;
+            hit.MouseEnter += delegate { Grow(grow, HoverScale); };
+            hit.MouseLeave += delegate { Grow(grow, 1.0); };
             _dotHits[r.Addr] = hit;
             return hit;
+        }
+
+        private const double HoverScale = 1.45;
+
+        private static void Grow(ScaleTransform st, double to)
+        {
+            DoubleAnimation a = new DoubleAnimation(to, TimeSpan.FromMilliseconds(140));
+            CubicEase ease = new CubicEase();
+            ease.EasingMode = EasingMode.EaseOut;
+            a.EasingFunction = ease;
+            st.BeginAnimation(ScaleTransform.ScaleXProperty, a);
+            st.BeginAnimation(ScaleTransform.ScaleYProperty, a);
+        }
+
+        /// <summary>Test only: the same enter or leave a real pointer causes on that agent's dot.</summary>
+        public bool SimulateDotHover(string addr, bool over)
+        {
+            Border hit;
+            if (addr == null || !_dotHits.TryGetValue(addr, out hit)) return false;
+            MouseEventArgs e = new MouseEventArgs(Mouse.PrimaryDevice, Environment.TickCount);
+            e.RoutedEvent = over ? Mouse.MouseEnterEvent : Mouse.MouseLeaveEvent;
+            hit.RaiseEvent(e);
+            return true;
         }
 
         /// <summary>Test only: runs a press and release on that agent's dot through the real handlers.</summary>

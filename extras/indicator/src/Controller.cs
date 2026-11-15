@@ -437,6 +437,14 @@ namespace SparkIndicator
                         }
                     }
                     break;
+                case "dot-hover":
+                    {
+                        // "dot-hover <address> on|off": the hover a real pointer causes on that agent's dot.
+                        string[] hp = arg.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                        if (!Program.Opt.DryRun) Log.Write("command 'dot-hover' ignored: only honored with --dry-run");
+                        else if (hp.Length == 2) Log.Write("dot-hover " + arg + ": " + (_pill.SimulateDotHover(hp[0], hp[1] == "on") ? "sent" : "no clickable dot for that address"));
+                    }
+                    break;
                 case "dot-click":
                     // The same press and release a real click on that agent's dot goes through.
                     if (Program.Opt.DryRun) Log.Write("dot-click " + arg + ": " + (_pill.SimulateDotClick(arg) ? "sent" : "no clickable dot for that address"));
