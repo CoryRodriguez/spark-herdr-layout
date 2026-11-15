@@ -1,6 +1,6 @@
 # Spark Indicator
 
-A small always-on-top strip for Windows that shows what your Herdr agents are doing while Herdr itself is behind other windows: one dot per agent, grouped by space. Blue is working, amber is waiting for you (the strip flashes three times and keeps an amber outline), green is done and not yet looked at, a hollow ring is idle. Hover for the list of names; click a name to jump to that agent in Herdr.
+A small always-on-top strip for Windows that shows what your Herdr agents are doing while Herdr itself is behind other windows: one dot per agent, grouped by space. Blue is working, amber is waiting for you (the strip flashes three times and keeps an amber outline), green is done and not yet looked at, a hollow ring is idle. Click a dot to jump to that agent in Herdr, or hover for the list of names and click a name.
 
 `install.cmd` in the package root sets it up for you. This folder is its complete source; no ready-made program file is shipped.
 

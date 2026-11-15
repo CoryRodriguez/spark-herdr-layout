@@ -38,4 +38,4 @@ Full details, the by-hand steps, and exactly what the look does on your machine 
 
 - Made and tested on Windows 11 with herdr-app 0.1.14 and herdr-core 0.1.19. Other versions, macOS and Linux have not been tried.
 - No network connections are made by the look, the search, the indicator or the installer.
-- Right-click the indicator for Light or Dark, strip or stack, and Start with Windows.
+- Click a dot in the indicator to jump to that agent in Herdr. Right-click it for Light or Dark, strip or stack, and Start with Windows.

@@ -325,6 +325,8 @@ namespace SparkIndicator
         private bool _alert;
         private bool _pressed;
         private bool _dragging;
+        private string _downAddr;            // the agent whose dot the press started on, if any
+        private readonly Dictionary<string, Border> _dotHits = new Dictionary<string, Border>();
         private Native.POINT _downPt;
         private Native.RECT _downRect;
 
@@ -333,6 +335,7 @@ namespace SparkIndicator
         public event Action MenuRequested;
         public event Action DragStarted;
         public event Action DragEnded;
+        public event Action<string> DotClicked;   // a plain click (no drag) on one agent's dot
 
         public bool IsDragging { get { return _dragging; } }
 
@@ -384,6 +387,7 @@ namespace SparkIndicator
             Native.GetWindowRect(Hwnd, out _downRect);
             _pressed = true;
             _dragging = false;
+            _downAddr = AddrUnder(e.OriginalSource as DependencyObject);
             _pill.CaptureMouse();
             e.Handled = true;
         }
@@ -407,7 +411,61 @@ namespace SparkIndicator
         {
             if (!_pressed) return;
             e.Handled = true;
+            string addr = _dragging ? null : _downAddr;   // a drag moves the window; only a still click jumps
+            _downAddr = null;
             _pill.ReleaseMouseCapture(); // ends the press through LostMouseCapture
+            if (addr != null)
+            {
+                Action<string> h = DotClicked;
+                if (h != null) h(addr);
+            }
+        }
+
+        private static string AddrUnder(DependencyObject o)
+        {
+            while (o != null)
+            {
+                FrameworkElement fe = o as FrameworkElement;
+                if (fe != null && fe.Tag is string) return (string)fe.Tag;
+                o = VisualTreeHelper.GetParent(o);
+            }
+            return null;
+        }
+
+        // One agent's dot. A clickable one sits in an invisible, slightly larger target (3 px more on
+        // every side) so it is easy to hit; the margins cancel that out, so nothing moves on screen.
+        private FrameworkElement DotFor(Row r, double left)
+        {
+            FrameworkElement d = Theme.Dot(r.Kind);
+            if (!r.Clickable || string.IsNullOrEmpty(r.Addr))
+            {
+                d.Margin = new Thickness(left, 0, 0, 0);
+                return d;
+            }
+            Border hit = new Border();
+            hit.Background = Brushes.Transparent;
+            hit.Padding = new Thickness(3);
+            hit.Margin = new Thickness(left - 3, -3, -3, -3);
+            hit.VerticalAlignment = VerticalAlignment.Center;
+            hit.Cursor = Cursors.Hand;
+            hit.Tag = r.Addr;
+            hit.Child = d;
+            _dotHits[r.Addr] = hit;
+            return hit;
+        }
+
+        /// <summary>Test only: runs a press and release on that agent's dot through the real handlers.</summary>
+        public bool SimulateDotClick(string addr)
+        {
+            Border hit;
+            if (addr == null || !_dotHits.TryGetValue(addr, out hit)) return false;
+            MouseButtonEventArgs down = new MouseButtonEventArgs(Mouse.PrimaryDevice, Environment.TickCount, MouseButton.Left);
+            down.RoutedEvent = Mouse.MouseDownEvent;
+            hit.RaiseEvent(down);
+            MouseButtonEventArgs up = new MouseButtonEventArgs(Mouse.PrimaryDevice, Environment.TickCount, MouseButton.Left);
+            up.RoutedEvent = Mouse.MouseUpEvent;
+            _pill.RaiseEvent(up);
+            return true;
         }
 
         private void EndPress()
@@ -474,6 +532,7 @@ namespace SparkIndicator
 
         public void Render(List<SpaceVM> spaces, bool connected, string mode)
         {
+            _dotHits.Clear();
             if (!connected || spaces.Count == 0)
             {
                 SetRadius(13);
@@ -510,9 +569,7 @@ namespace SparkIndicator
                     line.Children.Add(label);
                     foreach (Row r in s.Rows)
                     {
-                        FrameworkElement d = Theme.Dot(r.Kind);
-                        d.Margin = new Thickness(6, 0, 0, 0);
-                        line.Children.Add(d);
+                        line.Children.Add(DotFor(r, 6));
                     }
                     col.Children.Add(line);
                 }
@@ -544,9 +601,7 @@ namespace SparkIndicator
                 strip.Children.Add(label);
                 foreach (Row r in s.Rows)
                 {
-                    FrameworkElement d = Theme.Dot(r.Kind);
-                    d.Margin = new Thickness(7, 0, 0, 0);
-                    strip.Children.Add(d);
+                    strip.Children.Add(DotFor(r, 7));
                 }
             }
             _pill.Child = strip;

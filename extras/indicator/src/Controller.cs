@@ -60,6 +60,7 @@ namespace SparkIndicator
             _pill.MenuRequested += ToggleMenu;
             _pill.DragStarted += delegate { _openTimer.Stop(); HideList(); HideMenu(); };
             _pill.DragEnded += OnDragEnded;
+            _pill.DotClicked += OnDotClicked;
             _pill.Command += OnCommand;
             _pill.DisplayChanged += delegate { EnsureOnScreen(); ApplyAnchor(); };
             _pill.SizeChanged += delegate { ApplyAnchor(); if (_list.IsVisible) PositionList(); };
@@ -248,6 +249,13 @@ namespace SparkIndicator
             if (_list.IsVisible) _list.Hide();
         }
 
+        private void OnDotClicked(string addr)
+        {
+            _openTimer.Stop();
+            Log.Write("dot click: " + addr);
+            OnRowClicked(addr);
+        }
+
         private void OnRowClicked(string addr)
         {
             _client.Focus(addr);
@@ -428,6 +436,11 @@ namespace SparkIndicator
                             OnDragEnded();
                         }
                     }
+                    break;
+                case "dot-click":
+                    // The same press and release a real click on that agent's dot goes through.
+                    if (Program.Opt.DryRun) Log.Write("dot-click " + arg + ": " + (_pill.SimulateDotClick(arg) ? "sent" : "no clickable dot for that address"));
+                    else Log.Write("command 'dot-click' ignored: only honored with --dry-run");
                     break;
                 case "click":
                     if (Program.Opt.DryRun) OnRowClicked(arg);

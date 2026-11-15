@@ -56,7 +56,7 @@ Read this before you install; Herdr mods are trusted code.
 
 ## The indicator
 
-The Spark Indicator is for Windows. It sits on top of your other windows as a slim strip: a short label per space and one dot per agent. Blue is working, amber is waiting for you (the strip flashes three times, then keeps an amber outline), green is done and not yet looked at, a hollow ring is idle. Point at it for the list of names; click a name to go to that agent in Herdr.
+The Spark Indicator is for Windows. It sits on top of your other windows as a slim strip: a short label per space and one dot per agent. Blue is working, amber is waiting for you (the strip flashes three times, then keeps an amber outline), green is done and not yet looked at, a hollow ring is idle. Click a dot to go straight to that agent in Herdr, or point at the strip for the list of names and click a name.
 
 - **Where it comes from.** No program file is shipped. `install.cmd` compiles it on your computer from the source in `extras/indicator/` with Windows' own C# compiler, into `%LOCALAPPDATA%\SparkIndicator\`, and starts it. `extras/indicator/README.md` says what each file is and how to build it by hand.
 - **Light or dark.** Right-click the strip and pick **Light** or **Dark**. It changes at once and is remembered. The two looks use the colors of the day and night themes of the window. Until you pick one it uses its original dark look.
