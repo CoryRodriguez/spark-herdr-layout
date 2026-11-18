@@ -33,12 +33,17 @@ Full details, the by-hand steps, and exactly what the look does on your machine 
 | `keys.json` | The one optional key binding (Ctrl+F for search), to merge by hand |
 | `SETUP.md` | Setup guide and disclosure |
 | `RECIPE.md` | A full description of the look, for rebuilding it from scratch |
+| `claude-terminal-look/` | Optional: a status line and settings guide for Claude Code |
 
 ## Good to know
 
 - Made and tested on Windows 11 with herdr-app 0.1.14 and herdr-core 0.1.19. Other versions, macOS and Linux have not been tried.
 - No network connections are made by the look, the search, the indicator or the installer.
 - Click a dot in the indicator to jump to that agent in Herdr. Right-click it for Light or Dark, strip or stack, and Start with Windows.
+
+## Optional: the same Claude Code terminal look
+
+The folder `claude-terminal-look/` is separate from the Herdr look and the installer does not touch it. It holds a one-line status line for Claude Code (folder, model, context bar, usage and cost) and a short guide to the three Claude Code settings that make the terminal match: the status line, the full-screen display and colors that follow light and dark. See [claude-terminal-look/SETUP.md](claude-terminal-look/SETUP.md).
 
 ## License
 
