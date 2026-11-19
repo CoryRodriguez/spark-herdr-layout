@@ -594,7 +594,7 @@ namespace SparkIndicator
                     if (!first) line.Margin = new Thickness(0, 5, 0, 0);
                     first = false;
                     TextBlock label = Theme.Label(s.Short, 10, Theme.Muted, true);
-                    label.Width = 34;
+                    label.Width = 40;
                     line.Children.Add(label);
                     foreach (Row r in s.Rows)
                     {

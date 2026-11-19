@@ -136,6 +136,19 @@ namespace SparkIndicator
         [DllImport("user32.dll")]
         public static extern IntPtr GetWindow(IntPtr hWnd, uint cmd);
 
+        // ---- staying on top: the taskbar is topmost too and re-raises itself when used ----
+        public const uint GW_HWNDPREV = 3;
+        public const uint EVENT_SYSTEM_FOREGROUND = 0x0003;
+        public const uint WINEVENT_OUTOFCONTEXT = 0x0000;
+
+        public delegate void WinEventProc(IntPtr hook, uint evt, IntPtr hwnd, int idObject, int idChild, uint thread, uint time);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr SetWinEventHook(uint eventMin, uint eventMax, IntPtr hmod, WinEventProc proc, uint pid, uint thread, uint flags);
+
+        [DllImport("user32.dll")]
+        public static extern bool UnhookWinEvent(IntPtr hook);
+
         // ---- job object: children die with the indicator, however it ends ----
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
         public static extern IntPtr CreateJobObjectW(IntPtr attrs, string name);

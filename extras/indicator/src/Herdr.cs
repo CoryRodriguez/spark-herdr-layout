@@ -775,6 +775,8 @@ namespace SparkIndicator
             if (word.Length > 0) w.Add(word.ToString());
             if (w.Count == 0) return name.Length > 4 ? name.Substring(0, 4) : name;
             string first = w[0];
+            // A short single word (up to 5 letters, e.g. SETUP) is shown whole rather than clipped.
+            if (w.Count == 1 && first.Length <= 5) return first.ToUpperInvariant();
             if (w.Count == 1 || (first.Length >= 2 && first.Length <= 4))
                 return (first.Length > 4 ? first.Substring(0, 4) : first).ToUpperInvariant();
             StringBuilder sb = new StringBuilder();

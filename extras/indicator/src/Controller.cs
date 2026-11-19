@@ -30,6 +30,10 @@ namespace SparkIndicator
         private readonly DispatcherTimer _openTimer;
         private readonly DispatcherTimer _hideTimer;
         private readonly DispatcherTimer _menuTimer;
+        private readonly DispatcherTimer _topTimer;
+        private Native.WinEventProc _fgProc;   // kept in a field so the GC never collects the hook's callback
+        private IntPtr _fgHook;
+        private static readonly uint OwnPid = (uint)System.Diagnostics.Process.GetCurrentProcess().Id;
 
         public Controller(Settings settings)
         {
@@ -47,6 +51,13 @@ namespace SparkIndicator
 
             _menuTimer = new DispatcherTimer(DispatcherPriority.Normal, ui);
             _menuTimer.Tick += delegate { _menuTimer.Stop(); HideMenu(); };
+
+            // The pill can sit on the taskbar, and the taskbar is a topmost window as well: clicking it,
+            // opening Start or a taskbar preview puts it above the pill until something raises the pill
+            // again. Re-check whenever the foreground window changes, and once a second as a fallback.
+            _topTimer = new DispatcherTimer(DispatcherPriority.Background, ui);
+            _topTimer.Interval = TimeSpan.FromSeconds(1);
+            _topTimer.Tick += delegate { KeepOnTop(); };
         }
 
         public void Start()
@@ -81,11 +92,42 @@ namespace SparkIndicator
             EnsureOnScreen();
             ApplyAnchor();
 
+            _fgProc = delegate { _pill.Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(KeepOnTop)); };
+            _fgHook = Native.SetWinEventHook(Native.EVENT_SYSTEM_FOREGROUND, Native.EVENT_SYSTEM_FOREGROUND, IntPtr.Zero, _fgProc, 0, 0, Native.WINEVENT_OUTOFCONTEXT);
+            _topTimer.Start();
+
             _client.Start();
+        }
+
+        /// <summary>
+        /// Raises the pill if a window of another program sits above it and overlaps it. Windows above a
+        /// topmost window are topmost themselves, so this only ever finds the taskbar, Start and the like.
+        /// Our own list and menu are left alone so the pill never covers them.
+        /// </summary>
+        private void KeepOnTop()
+        {
+            if (_pill == null || _pill.Hwnd == IntPtr.Zero || !_pill.IsVisible || _pill.IsDragging) return;
+            Native.RECT me;
+            if (!Native.GetWindowRect(_pill.Hwnd, out me)) return;
+            for (IntPtr w = Native.GetWindow(_pill.Hwnd, Native.GW_HWNDPREV); w != IntPtr.Zero; w = Native.GetWindow(w, Native.GW_HWNDPREV))
+            {
+                if (!Native.IsWindowVisible(w)) continue;
+                uint pid;
+                Native.GetWindowThreadProcessId(w, out pid);
+                if (pid == OwnPid) continue;
+                Native.RECT r;
+                if (!Native.GetWindowRect(w, out r)) continue;
+                bool overlaps = r.Left < me.Right && me.Left < r.Right && r.Top < me.Bottom && me.Top < r.Bottom;
+                if (!overlaps) continue;
+                _pill.RaiseTopmost();
+                return;
+            }
         }
 
         public void Shutdown()
         {
+            _topTimer.Stop();
+            if (_fgHook != IntPtr.Zero) { Native.UnhookWinEvent(_fgHook); _fgHook = IntPtr.Zero; }
             _client.Stop();
         }
 
