@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """A one-line status line for Claude Code.
 
-    C:\\Work\\app main | Opus 5.5 · high · think | ctx [bar] 34% (68k/200k) | 7d 9% (reset) Fri 9:00am | $2.41 +120/-18
+    Cory | C:\\Work\\app main | Opus 5.5 · high · think | ctx [bar] 34% (68k/200k) | 7d 9% (reset) Fri 9:00am | $2.41 +120/-18
 
 Claude Code runs this after each turn, hands it a JSON description of the session on
-standard input, and shows whatever it prints. It reads nothing else, writes no files and
-makes no network connection. Any missing field simply leaves its own segment out.
+standard input, and shows whatever it prints. Besides that it reads only the account file of
+the Claude config it runs under (to name the account); it writes no files and makes no
+network connection. Any missing field simply leaves its own segment out.
 
-Segments, left to right: folder (and git branch), model with effort and thinking, context
+Segments, left to right: account (which login this session uses: two configs can run the
+same claude program, so nothing else on screen tells them apart), folder (and git branch), model with effort and thinking, context
 window used, usage windows (5-hour and 7-day, when the plan reports them) with their reset
 time, pull request number, session cost with lines added and removed, spend limit.
 
@@ -94,6 +96,23 @@ def branch(cwd):
         return None
 
 
+def account():
+    """The signed-in account's display name, from the config this session runs under.
+
+    CLAUDE_CONFIG_DIR picks the config (e.g. ~/.claude-other for a second login); without it
+    the account file is ~/.claude.json. Returns None when it cannot be read.
+    """
+    base = os.environ.get("CLAUDE_CONFIG_DIR")
+    path = os.path.join(base, ".claude.json") if base else os.path.expanduser("~/.claude.json")
+    try:
+        with open(path, encoding="utf-8") as f:
+            acct = json.load(f).get("oauthAccount") or {}
+    except Exception:
+        return None
+    name = acct.get("displayName") or (acct.get("emailAddress") or "").split("@")[0]
+    return name or None
+
+
 def session_cost(d):
     """Session cost and lines touched, e.g. '$1.23 +40/-7'."""
     cost = d.get("cost") or {}
@@ -127,6 +146,10 @@ def main():
         return
 
     parts = []
+
+    who = account()
+    if who:
+        parts.append(f"\033[1;38;5;179m{who}{RESET}")
 
     cwd = (d.get("workspace") or {}).get("current_dir") or d.get("cwd") or ""
     if cwd:
