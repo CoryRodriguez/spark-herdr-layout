@@ -8,7 +8,10 @@
 // the pressed tab lifts and follows the pointer, neighbors glide aside, release moves
 // the space (space.move), leaving the tab area cancels. A space stays among the
 // spaces of its own machine.
-// A "+" after the last one makes a new space ("+ Space" when the layout's
+// Each space tab has a close "x" like the agent tabs; it asks first with the same
+// "Enter to confirm · Esc to cancel" dialog (end.js);
+// when the row gets tight only the selected space keeps it.
+// A "+" after the last one makes a new space and asks for its name ("+ Space" when the layout's
 // plus_labels switch is on). On the right: a search bar (a
 // button that opens the spark-search panel over itself), the clock, the
 // day/night button (props.features), settings and, where the system draws none,
@@ -18,7 +21,7 @@ import { div } from "gpui-kit";
 import { h_flex, v_flex } from "gpui-base";
 import { exists } from "fs/promises";
 import { spaces, agents, run, updates, settings, notify, openOverlay, appHome, keys, shared, window as appWindow } from "herdr";
-import { P, S, M, L, REG, SEMI, icon, label, numBox, dot, clock, menu, onRight, stopPress, unzoom, layoutNode, plusLabels, plusWidth, plusButton, brandMark, withKey, TITLE, SUBTITLE } from "./kit.js";
+import { P, MOD, S, M, L, REG, SEMI, icon, label, numBox, dot, clock, menu, onRight, stopPress, unzoom, layoutNode, plusLabels, plusWidth, plusButton, brandMark, withKey, newSpace, TITLE, SUBTITLE } from "./kit.js";
 import { spaceSignal, nameCap } from "./names.js";
 import { writeAppearance, spawn } from "./data.js";
 import { appearanceTip, toggledAppearance, searchPanelAt, shortcutFor } from "./logic.js";
@@ -148,9 +151,9 @@ export default class Header {
     const room = total - (brandW ?? 200) - 14 - tailW - (18 + plusWidth(plusWord));
     const want = list.map((s) => Math.ceil(String(s.name ?? "").length * (s.active ? 7.4 : 6.8)) + 4);
     const dots = signals.filter(Boolean).length * 16;
-    let cap = nameCap(want, room - list.length * 108 - dots);
+    let cap = nameCap(want, room - list.length * 135 - dots);
     const compact = cap < 64;
-    if (compact) cap = Math.max(28, nameCap(want, room - list.length * 63 - dots));
+    if (compact) cap = Math.max(28, nameCap(want, room - list.length * 63 - 27 - dots)); // only the selected space keeps its x
     cap = Math.floor(cap);
 
     const brand = h_flex().gap(10).items_center().flex_none()
@@ -184,7 +187,15 @@ export default class Header {
       // Mid-drag: none on the dragged tab, and none beside the gap it is headed for.
       const nextId = reading[reading.indexOf(s.id) + 1];
       const divider = !on && s.id !== gapId && !(nextId !== undefined && nextId === gapId) && !byId[nextId]?.active;
-      const el = h_flex().id(`hsp-${s.id}`).relative().h(TAB_HEIGHT).flex_none().pl(10).pr(16).gap(9).items_center().rounded_t(10).cursor_pointer()
+      const showX = on || !compact;
+      // The x: our confirmation dialog (end.js) asks before closing the space and ending its terminals. A press on it neither
+      // starts a drag nor selects the space, and never moves the window.
+      const close = div().id(`hspx-${s.id}`).w(18).h(18).flex_none().rounded(9).flex().items_center().justify_center().cursor_pointer()
+        .hover((x) => x.bg(c.selected)).tooltip("Close this space")
+        .on_mouse_down("left", (_e, cx) => { cx.stop_propagation(); this.drag.otherPress(cx, this.spaceRow()); })
+        .on_click((_e, cx) => { cx.stop_propagation(); if (this.drag.dragging) return; openOverlay({ mod: MOD, kind: "dialog", modal: true, width: 420, height: 196, props: { role: "end", space: s.id, name: String(s.name ?? "") } }); })
+        .child(icon("close", 11, c.dim));
+      const el = h_flex().id(`hsp-${s.id}`).relative().h(TAB_HEIGHT).flex_none().pl(10).pr(showX ? 8 : 16).gap(9).items_center().rounded_t(10).cursor_pointer()
         .tooltip(`${s.name} · ${count}${sig === "blocked" ? " · an agent is waiting for you" : sig === "working" ? " · working" : ""}`)
         .when(on, (el) => el.bg(c.canvas))
         .hover((x) => x.bg(on ? c.canvas : c.hover));
@@ -204,12 +215,13 @@ export default class Header {
         .child(numBox(s.index, 24, on ? "solid" : "soft"))
         .child(div().max_w(cap).truncate().text_size(M).font_weight(on ? SEMI : REG).text_color(on ? c.fg : c.muted).child(String(s.name ?? "")))
         .when(Boolean(sig), (el) => el.child(dot(sig)))
-        .when(!compact, (el) => el.child(label(count, c.dim).flex_none()));
+        .when(!compact, (el) => el.child(label(count, c.dim).flex_none()))
+        .when(showX, (el) => el.child(close));
     };
 
     const addSpace = plusButton("space-new", plusWord).mb(7).ml(6).tooltip(withKey("New space", "space.new"))
       .on_mouse_down("left", (_e, cx) => { cx.stop_propagation(); this.drag.otherPress(cx, this.spaceRow()); })
-      .on_click(() => run("space.new", {}));
+      .on_click(() => newSpace());
 
     // The lifted copy of the dragged space tab: drawn last so it is on top, with no handlers and no divider.
     const liftSpace = () => {
@@ -218,13 +230,15 @@ export default class Header {
       const on = Boolean(s.active);
       const sig = signals[list.indexOf(s)];
       const n = s.tabs.length;
-      return this.drag.lift(h_flex().id("hsp-lift"), moving).h(TAB_HEIGHT).pl(10).pr(16).gap(9).items_center()
+      const showX = on || !compact;
+      return this.drag.lift(h_flex().id("hsp-lift"), moving).h(TAB_HEIGHT).pl(10).pr(showX ? 8 : 16).gap(9).items_center()
         .rounded_t(10).bg(c.canvas).shadow_md().overflow_hidden()
         .child(div().absolute().top(0).left(0).right(0).h(14).rounded_t(10).border_t(3).border_color(c.hue(s.index)))
         .child(numBox(s.index, 24, on ? "solid" : "soft"))
         .child(div().max_w(cap).truncate().text_size(M).font_weight(on ? SEMI : REG).text_color(c.fg).child(String(s.name ?? "")))
         .when(Boolean(sig), (el) => el.child(dot(sig)))
-        .when(!compact, (el) => el.child(label(`${n} ${n === 1 ? "tab" : "tabs"}`, c.dim).flex_none()));
+        .when(!compact, (el) => el.child(label(`${n} ${n === 1 ? "tab" : "tabs"}`, c.dim).flex_none()))
+        .when(showX, (el) => el.child(div().w(18).h(18).flex_none().flex().items_center().justify_center().child(icon("close", 11, c.dim))));
     };
     const liftedSpace = moving ? liftSpace() : null;
 

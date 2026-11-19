@@ -23,7 +23,7 @@
 import { div } from "gpui-kit";
 import { h_flex, v_flex } from "gpui-base";
 import { spaces, agents, panes, props, run, shared, setShared, setAgentOrder } from "herdr";
-import { P, WORD, SHORT, S, M, REG, SEMI, tint, icon, label, numBox, two, tabLabel, menu, onRight, stopPress, unzoom, withKey } from "./kit.js";
+import { P, WORD, SHORT, S, M, REG, SEMI, tint, icon, label, numBox, two, tabLabel, menu, onRight, stopPress, unzoom, withKey, newSpace } from "./kit.js";
 import { sessionName, tabName, sidebarTree, dropMove } from "./names.js";
 import { RowDrag } from "./rowdrag.js";
 import { readLog, notable, openActivity, hm, TAG, tone } from "./activity.js";
@@ -227,7 +227,7 @@ export default class Sidebar {
 
     const addRow = h_flex().id("sp-new").w_full().h(42).flex_none().mt(4).pl(8).pr(10).gap(9).items_center().rounded(8).cursor_pointer().opacity(0.6)
       .hover((x) => x.bg(c.hover)).tooltip(withKey("New space", "space.new"))
-      .on_click(() => run("space.new", {}))
+      .on_click(() => newSpace())
       .child(div().w(28).h(28).flex_none().flex().items_center().justify_center().rounded(7).bg(c.bg).border(1).border_dashed().border_color(c.input)
         .child(icon("plus", 13, c.muted)))
       .child(div().text_size(M).font_weight(REG).text_color(c.muted).child("New space"));

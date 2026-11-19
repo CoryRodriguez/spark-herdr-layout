@@ -8,7 +8,7 @@
 
 import { div, svg, image } from "gpui-kit";
 import { h_flex } from "gpui-base";
-import { openOverlay, theme, settings, props, layout, keys, shared } from "herdr";
+import { openOverlay, theme, settings, props, layout, keys, shared, run } from "herdr";
 import { clock12, shortcutFor } from "./logic.js";
 
 export const ASSETS = "mods/spark";
@@ -188,6 +188,9 @@ export function displayName(p) {
 
 export const menu = (tab, target) => openOverlay({ mod: "menu", kind: "popup", width: 220, height: 260, props: { tab, target } });
 export const newMenu = () => openOverlay({ mod: "new-menu", kind: "popup", width: 250, height: 512 });
+/** The "+" for spaces: makes a space (it is shown at once), then Herdr asks for its name.
+ *  Cancelling the name keeps Herdr's automatic name (where its first terminal is). */
+export const newSpace = () => { run("space.new", {}); run("space.rename", {}); };
 export const onRight = (open) => (_e, cx) => { cx.stop_propagation(); open(); };
 export const stopPress = (_e, cx) => cx.stop_propagation();
 
