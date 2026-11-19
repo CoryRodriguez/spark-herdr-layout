@@ -1,5 +1,5 @@
 {
-  "mode": "strip",
+  "mode": "stack",
   "greenUntilSeen": true,
   "shortNames": {},
   "hcPath": null,

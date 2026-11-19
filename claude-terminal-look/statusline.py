@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """A one-line status line for Claude Code.
 
-    Cory | C:\\Work\\app main | Opus 5.5 · high · think | ctx [bar] 34% (68k/200k) | 7d 9% (reset) Fri 9:00am | $2.41 +120/-18
+    Alex | C:\\Work\\app main | Opus 5.5 · high · think | ctx [bar] 34% (68k/200k) | 7d 9% (reset) Fri 9:00am | $2.41 +120/-18
 
 Claude Code runs this after each turn, hands it a JSON description of the session on
 standard input, and shows whatever it prints. Besides that it reads only the account file of
