@@ -151,9 +151,9 @@ export default class Header {
     const room = total - (brandW ?? 200) - 14 - tailW - (18 + plusWidth(plusWord));
     const want = list.map((s) => Math.ceil(String(s.name ?? "").length * (s.active ? 7.4 : 6.8)) + 4);
     const dots = signals.filter(Boolean).length * 16;
-    let cap = nameCap(want, room - list.length * 135 - dots);
+    let cap = nameCap(want, room - list.length * 127 - dots); // 108 + the x: 9 gap + 18 x - 8 less right padding
     const compact = cap < 64;
-    if (compact) cap = Math.max(28, nameCap(want, room - list.length * 63 - 27 - dots)); // only the selected space keeps its x
+    if (compact) cap = Math.max(28, nameCap(want, room - list.length * 63 - 19 - dots)); // only the selected space keeps its x (+19 px)
     cap = Math.floor(cap);
 
     const brand = h_flex().gap(10).items_center().flex_none()

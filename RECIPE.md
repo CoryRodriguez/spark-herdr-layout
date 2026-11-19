@@ -83,7 +83,7 @@ root column
 
 **From the `herdr` module**: `agents`, `appHome`, `closeOverlay`, `exec`, `hc`, `home`, `keys`, `layout`, `nextCommand`, `notify`, `openOverlay`, `panes`, `props`, `readTextFile`, `run`, `setAgentOrder`, `setShared`, `settings`, `shared`, `spaces`, `terminals`, `theme`, `updates`, `window`, `writeTextFile`. From `fs/promises`: `exists`, `mkdir`.
 
-**Commands it runs**: `agent.focus`, `app.settings`, `layout.hide`, `layout.select`, `layout.show`, `pane.close`, `pane.focus`, `pane.split`, `pane.zoom`, `space.move`, `space.new`, `space.select`, `tab.close`, `tab.move`, `tab.select`, `tab.unsettle`, `window.close`, `window.maximize`, `window.minimize`.
+**Commands it runs**: `agent.focus`, `app.settings`, `layout.hide`, `layout.select`, `layout.show`, `pane.close`, `pane.focus`, `pane.split`, `pane.zoom`, `space.close`, `space.move`, `space.new`, `space.rename`, `space.select`, `tab.close`, `tab.move`, `tab.select`, `tab.unsettle`, `window.close`, `window.maximize`, `window.minimize`.
 
 **Programs it runs**: `hc get <terminal> --json`, once per agent, to learn when its terminal started and with what command. `hc read <terminal> --json`, from the search panel only, once per open local terminal per text search (at most 40), to get the text that terminal shows on screen; never with a line count. On Windows only, and only if a Python 3.8+ answers on the PATH (tried once per load as `pythonw`, `pyw`, `python3`, `python`, `py`): `tools/notify_toast.py`, which hands one notification to Windows PowerShell. Nothing else, and nothing over the network.
 
