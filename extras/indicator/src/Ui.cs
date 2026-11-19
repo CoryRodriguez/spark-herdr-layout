@@ -437,19 +437,21 @@ namespace SparkIndicator
         private FrameworkElement DotFor(Row r, double left)
         {
             FrameworkElement d = Theme.Dot(r.Kind);
-            if (!r.Clickable || string.IsNullOrEmpty(r.Addr))
-            {
-                d.Margin = new Thickness(left, 0, 0, 0);
-                return d;
-            }
+            // Every dot sits in the same 3 px wrapper, clickable or not, so a shell-only dot is laid
+            // out exactly like an agent dot (placed bare, it landed 1 px higher than the others).
             Border hit = new Border();
-            hit.Background = Brushes.Transparent;
             hit.Padding = new Thickness(3);
             hit.Margin = new Thickness(left - 3, -3, -3, -3);
             hit.VerticalAlignment = VerticalAlignment.Center;
+            hit.Child = d;
+            if (!r.Clickable || string.IsNullOrEmpty(r.Addr))
+            {
+                hit.IsHitTestVisible = false;
+                return hit;
+            }
+            hit.Background = Brushes.Transparent;
             hit.Cursor = Cursors.Hand;
             hit.Tag = r.Addr;
-            hit.Child = d;
             // Hover: the dot swells by about half and settles back when the pointer leaves.
             ScaleTransform grow = new ScaleTransform(1, 1);
             d.RenderTransformOrigin = new Point(0.5, 0.5);
