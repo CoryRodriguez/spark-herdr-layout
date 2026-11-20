@@ -34,6 +34,7 @@ Full details, the by-hand steps, and exactly what the look does on your machine 
 | `SETUP.md` | Setup guide and disclosure |
 | `RECIPE.md` | A full description of the look, for rebuilding it from scratch |
 | `claude-terminal-look/` | Optional: a status line and settings guide for Claude Code |
+| `extras/multi-account/` | Optional: a launcher and Herdr menu entry per Claude Code login, and new terminals that start Claude |
 
 ## Good to know
 
@@ -44,6 +45,10 @@ Full details, the by-hand steps, and exactly what the look does on your machine 
 ## Optional: the same Claude Code terminal look
 
 The folder `claude-terminal-look/` is separate from the Herdr look and the installer does not touch it. It holds a one-line status line for Claude Code (folder, model, context bar, usage and cost) and a short guide to the three Claude Code settings that make the terminal match: the status line, the full-screen display and colors that follow light and dark. See [claude-terminal-look/SETUP.md](claude-terminal-look/SETUP.md).
+
+## Optional: more than one Claude Code login
+
+The folder `extras/multi-account/` is separate too, and the installer doesn't run it. For Claude Code in WSL, it finds your logins and makes a launcher and a "Claude · <name>" Herdr menu entry for each, and it can make every new space, tab and split start Claude as the login you pick. With no login found, it changes nothing. See [extras/multi-account/README.md](extras/multi-account/README.md).
 
 ## License
 
