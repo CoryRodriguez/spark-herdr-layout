@@ -259,14 +259,14 @@ export default class Header {
     const searchKey = shortcutFor(keys(), `mod.open:${SEARCH_MOD}`, shared("layout"));
     const search = h_flex().id("search").w(barW).h(BAR_HEIGHT).flex_none().gap(9).items_center().rounded(9).cursor_pointer()
       .bg(c.bg).border(BAR_BORDER).border_color(c.input).hover((x) => x.border_color(c.accent))
-      .tooltip(`Search agents, projects and on-screen words${searchKey ? ` (${searchKey})` : ""}`)
+      .tooltip(`Search agents, projects and words${searchKey ? ` (${searchKey})` : ""}`)
       .when(barW > BAR_HEIGHT, (el) => el.pl(11).pr(8))
       .when(barW <= BAR_HEIGHT, (el) => el.justify_center())
       .on_mouse_down("left", (e, cx) => { cx.stop_propagation(); this.notePress(e); })
       .on_click((_e, cx) => this.openSearch(cx, barW, guess, this.width ? total : 0))
       .child(icon("search", 15, c.dim))
       .when(barW > BAR_HEIGHT, (el) => el.child(div().flex_1().min_w(0).truncate().text_size(M).font_weight(REG).text_color(c.dim)
-        .child("Search agents, projects, screen")))
+        .child("Search agents, projects, words")))
       .when(barW >= 320 && Boolean(searchKey), (el) => el.child(div().h(20).px(6).flex_none().flex().items_center().rounded(5).bg(c.chrome).border(1).border_color(c.border)
         .text_size(S).font_weight(REG).text_color(c.muted).child(searchKey)));
 

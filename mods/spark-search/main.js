@@ -81,7 +81,7 @@ export default class Search extends View {
       }
     }
     this.q = start;
-    this.input = InputState.new({ placeholder: "Search agents, projects, screen", value: start });
+    this.input = InputState.new({ placeholder: "Search agents, projects, words", value: start });
     this.input.on("change", (_e, cx) => this.typed(cx));
     this.input.on("submit", (_e, cx) => this.enter(cx));
     this.handle = cx.focus_handle();
