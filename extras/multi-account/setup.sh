@@ -53,11 +53,12 @@ DISTRO="${MA_DISTRO:-${WSL_DISTRO_NAME:-}}"
 HAVE_HERDR=0; [ -d "$HERDR_APP_HOME" ] && HAVE_HERDR=1
 
 # ---- Herdr file edits (python, so JSON and TOML stay intact) ----------------------------
-# set_shell <launcher|"">: put our `shell = [...]` at the top of herdr-core's config, or remove it.
+# set_shell <wrapper> <launcher> | "": put our `shell = [...]` at the top of herdr-core's config, or remove it.
+# The launcher goes on the command line so the login shows in it (Spark's sidebar reads it from there).
 set_shell() {
-  python3 -I - "$CORE_CONF" "$MARK" "$DISTRO" "$1" "$DRY" <<'PY'
+  python3 -I - "$CORE_CONF" "$MARK" "$DISTRO" "$1" "$DRY" "${2:-}" <<'PY'
 import os, sys, shutil, time
-path, mark, distro, target, dry = sys.argv[1:6]
+path, mark, distro, target, dry, launcher = sys.argv[1:7]
 lines = open(path, encoding="utf-8").read().splitlines() if os.path.exists(path) else []
 out, in_table = [], False
 for l in lines:
@@ -67,7 +68,7 @@ for l in lines:
         continue                      # our marker, or any earlier top-level shell line
     out.append(l)
 if target:
-    out = ["# " + mark, 'shell = ["wsl.exe", "-d", "%s", "-e", "%s"]' % (distro, target)] + out
+    out = ["# " + mark, 'shell = ["wsl.exe", "-d", "%s", "-e", "%s", "%s"]' % (distro, target, launcher)] + out
 if out == lines:
     print("  herdr-core config: no change"); sys.exit()
 if dry == "1":
@@ -79,7 +80,7 @@ if any(l.strip() for l in out):
     open(path, "w", encoding="utf-8", newline="\n").write("\n".join(out) + "\n")
 elif os.path.exists(path):
     os.remove(path)                   # nothing left: Herdr goes back to its own default
-print("  herdr-core config: updated (%s)" % ("new terminals start " + os.path.basename(target) if target else "default shell restored"))
+print("  herdr-core config: updated (%s)" % ("new terminals start " + os.path.basename(launcher) if target else "default shell restored"))
 PY
 }
 
@@ -258,12 +259,12 @@ if [ "$HAVE_HERDR" = 1 ]; then
         echo '#!/bin/bash'
         echo "# $MARK: what new plain Herdr terminals run. Starts Claude, then leaves a shell when Claude exits."
         echo 'if [[ "$PWD" == /mnt/* ]]; then d=$(sed -n "s/^START_DIR=//p" "$HOME/.config/herdr-multi-account/config" 2>/dev/null); d=${d:-~}; d=${d/#\~/$HOME}; cd "$d" 2>/dev/null || cd "$HOME"; fi'
-        printf '%q\n' "$BIN/$PREFIX$cname"
+        printf '"${1:-%s}"\n' "$BIN/$PREFIX$cname"   # the launcher herdr-core passes, else this one
         echo 'exec "${SHELL:-/bin/bash}" -l'
       } > "$WRAPPER"
       chmod +x "$WRAPPER"; say "  default terminal: $WRAPPER"
     fi
-    set_shell "$WRAPPER"
+    set_shell "$WRAPPER" "$BIN/$PREFIX$cname"
   else
     [ -f "$CORE_CONF" ] && set_shell ""
   fi

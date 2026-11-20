@@ -5,7 +5,7 @@
 
 import { agents, hc, setShared, shared, terminals } from "herdr";
 import { every, spawn } from "./data.js";
-import { agentSince, launchedDirectly, rowStats, updateSeen } from "./logic.js";
+import { accountOf, agentSince, launchedDirectly, rowStats, updateSeen } from "./logic.js";
 
 const SEEN_KEY = "spark.agents.seen"; // { address: { at, created_ms } }: kept across reloads
 
@@ -57,13 +57,13 @@ export class RowStats {
     if (next !== stored) setShared(SEEN_KEY, next);
   }
 
-  /** { time, timeTip } for a row; either may be null. */
+  /** { time, timeTip, account } for a row; any may be null. */
   of(agent, nowMs) {
     const d = this.detail(agent.address);
     const createdMs = d?.created_ms ?? undefined;
     const direct = launchedDirectly(d?.argv, agent);
     const seenAt = shared(SEEN_KEY)?.[agent.address]?.at;
     const sinceMs = agentSince({ direct, createdMs, seenAt: typeof seenAt === "number" && isFinite(seenAt) ? seenAt : null });
-    return rowStats({ createdMs, sinceMs, direct }, nowMs);
+    return { ...rowStats({ createdMs, sinceMs, direct }, nowMs), account: accountOf(d?.argv) };
   }
 }

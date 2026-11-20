@@ -59,6 +59,23 @@ export function launchedDirectly(argv, agent) {
   return Boolean(first) && isAgent(base(first[1] ?? first[2] ?? first[3]));
 }
 
+/**
+ * Which login an agent runs as, read from how its terminal was started: a launcher named
+ * `claude-as-<name>` (extras/multi-account) or `claude-<name>` anywhere in the command line.
+ * Returns "Sam" for claude-as-sam, or null when the command names no login.
+ */
+export function accountOf(argv) {
+  if (!Array.isArray(argv)) return null;
+  const words = argv.join(" ").split(/[\s'"&;]+/).map((w) => w.replace(/^.*[\\/]/, "").replace(/\.(exe|cmd|bat|ps1|sh)$/i, "").toLowerCase());
+  const pick = (re) => {
+    for (const w of words) { const m = re.exec(w); if (m && !NOT_ACCOUNTS.has(m[1])) return m[1]; }
+    return null;
+  };
+  const name = pick(/^claude-as-([a-z0-9][a-z0-9-]*)$/) ?? pick(/^claude-([a-z][a-z0-9-]*)$/);
+  return name ? name[0].toUpperCase() + name.slice(1) : null;
+}
+const NOT_ACCOUNTS = new Set(["code", "shell", "desktop", "cli", "as"]);
+
 export const BASELINE_GRACE_MS = 15 * 1000;
 
 /**

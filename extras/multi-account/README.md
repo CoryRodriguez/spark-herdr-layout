@@ -60,3 +60,4 @@ Each Herdr file is backed up (`.bak-<date>`) before it's changed. Your Claude Co
 - Made on Windows 11 with herdr-app 0.1.16, herdr-core 0.1.21 and Ubuntu in WSL 2. The Herdr settings it writes were tried live there; the script itself was tested with made-up logins and a dry run on a real machine. Claude Code installed natively on Windows or macOS isn't covered.
 - The default-terminal setting is herdr-core's `shell` option, so it also applies to terminals Herdr re-creates after a lost program.
 - Agent entries from the menu (any agent, not just these) still start as before.
+- **Spark's sidebar shows the login** after each agent's time ("25m  Sam"). It reads it from the launcher name on the terminal's command line, so it works for agents started from these menu entries, from new terminals, or from any launcher named `claude-<name>`. Agents started by typing `claude` in a plain terminal show no login.

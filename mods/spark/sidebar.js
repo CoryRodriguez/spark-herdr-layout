@@ -142,10 +142,14 @@ export default class Sidebar {
       const timed = Boolean(stats && stats.time);
       const small = (text) => div().flex_none().text_size(S).font_weight(REG).line_height(1.25).text_color(c.muted).child(text);
       const tipped = (el, id, tip) => (inert ? el : el.id(id).tooltip(tip));
+      // The login it runs as (claude-as-<name> / claude-<name> launchers), after the time.
+      const account = stats?.account ? tipped(small(stats.account), `ag-acct-${a.address}`, `Signed in as ${stats.account}`) : null;
+      const plain = label(session ? program : `Tab ${two(a.tab_index)}`, c.dim).truncate();
       const second = timed
         ? h_flex().min_w(0).overflow_hidden().gap(6).items_center()
           .child(stats.time ? tipped(small(stats.time).min_w(TIME_COLUMN), `ag-time-${a.address}`, stats.timeTip ?? "Time") : small("").min_w(TIME_COLUMN))
-        : label(session ? program : `Tab ${two(a.tab_index)}`, c.dim).truncate();
+          .when(Boolean(account), (el) => el.child(account))
+        : account ? h_flex().min_w(0).overflow_hidden().gap(6).items_center().child(plain).child(account) : plain;
       return h_flex().id(`${lift ? "lift-" : ""}ag-${a.address}`).relative().w_full().h(AGENT_ROW).flex_none().pl(8).pr(10).gap(10).items_center().rounded(8)
         .border(1).border_color(on ? c.border : c.chrome)
         .when(on, (el) => el.bg(c.bg))
